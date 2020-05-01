@@ -1,5 +1,5 @@
-const cols = 25;
-const rows = 25;
+const cols = 50;
+const rows = 50;
 let grid = new Array(cols);
 
 let openSet = [];
@@ -19,7 +19,6 @@ function removeFromArray(arr, elt) {
 }
 
 function heuristic(a, b) {
-  // return abs(a.x - b.x) + abs(a.y - b.y);
   return dist(a.x, a.y, b.x, b.y);
 }
 
@@ -31,10 +30,15 @@ function Spot(x, y) {
   this.h = 0;
   this.prev;
   this.neighbors = [];
+  this.wall = false;
+
+  if (random(1) < 0.5) {
+    this.wall = true;
+  }
 
   this.show = function (color) {
-    fill(color);
-    stroke(255);
+    this.wall ? fill(0) : fill(color);
+    stroke(0);
     rect(this.x * w, this.y * h, w, h);
   };
 
@@ -43,11 +47,19 @@ function Spot(x, y) {
     if (this.x > 0) this.neighbors.push(grid[this.x - 1][this.y]);
     if (this.y < rows - 1) this.neighbors.push(grid[this.x][this.y + 1]);
     if (this.y > 0) this.neighbors.push(grid[this.x][this.y - 1]);
+    if (this.x > 0 && this.y > 0)
+      this.neighbors.push(grid[this.x - 1][this.y - 1]);
+    if (this.x < cols - 1 && this.y > 0)
+      this.neighbors.push(grid[this.x + 1][this.y - 1]);
+    if (this.x > 0 && this.y < rows - 1)
+      this.neighbors.push(grid[this.x - 1][this.y + 1]);
+    if (this.x < cols - 1 && this.y < rows - 1)
+      this.neighbors.push(grid[this.x + 1][this.y + 1]);
   };
 }
 
 function setup() {
-  createCanvas(400, 400);
+  createCanvas(800, 800);
   console.log('A*');
 
   w = width / cols;
@@ -72,6 +84,8 @@ function setup() {
 
   start = grid[0][0];
   end = grid[cols - 1][rows - 1];
+  start.wall = false;
+  end.wall = false;
 
   openSet.push(start);
 }
@@ -100,32 +114,39 @@ function draw() {
     for (let i = 0; i < neighbors.length; i++) {
       let neighbor = neighbors[i];
 
-      if (!closedSet.includes(neighbor)) {
+      let newPath = false;
+
+      if (!closedSet.includes(neighbor) && !neighbor.wall) {
         let temp_gScore = current.g + 1;
 
         if (openSet.includes(neighbor)) {
           if (temp_gScore <= neighbor.g) {
             neighbor.g = temp_gScore;
+            newPath = true;
           }
         } else {
           neighbor.g = temp_gScore;
+          newPath = true;
           openSet.push(neighbor);
         }
-
-        neighbor.h = heuristic(neighbor, end);
-        neighbor.f = neighbor.g + neighbor.h;
-        neighbor.prev = current;
+        if (newPath) {
+          neighbor.h = heuristic(neighbor, end);
+          neighbor.f = neighbor.g + neighbor.h;
+          neighbor.prev = current;
+        }
       }
     }
   } else {
-    // no solution
+    console.log('NO SOLUTION');
+    noLoop();
+    return;
   }
 
-  background(0);
+  background(255);
 
   for (let i = 0; i < cols; i++) {
     for (let j = 0; j < cols; j++) {
-      grid[i][j].show(color(0));
+      grid[i][j].show(color(255));
     }
   }
 
@@ -133,7 +154,7 @@ function draw() {
     closedSet[i].show(color(255, 0, 0));
   }
   for (let i = 0; i < openSet.length; i++) {
-    openSet[i].show(color(0, 255, 0));
+    openSet[i].show(color(0, 0, 255));
   }
 
   path = [];
@@ -145,6 +166,6 @@ function draw() {
   }
 
   for (let i = 0; i < path.length; i++) {
-    path[i].show(color(0, 0, 255));
+    path[i].show(color(0, 255, 0));
   }
 }
