@@ -32,14 +32,15 @@ function Spot(x, y) {
   this.neighbors = [];
   this.wall = false;
 
-  if (random(1) < 0.5) {
+  if (random(1) < 0.4) {
     this.wall = true;
   }
 
   this.show = function (color) {
-    this.wall ? fill(0) : fill(color);
+    this.wall ? fill(255) : fill(color);
     stroke(0);
-    rect(this.x * w, this.y * h, w, h);
+    // rect(this.x * w, this.y * h, w, h);
+    ellipse(this.x * w + w / 2, this.y * h + h / 2, w / 2, h / 2);
   };
 
   this.addNeighbors = function () {
@@ -142,20 +143,20 @@ function draw() {
     return;
   }
 
-  background(255);
+  background(0);
 
   for (let i = 0; i < cols; i++) {
     for (let j = 0; j < cols; j++) {
-      grid[i][j].show(color(255));
+      grid[i][j].show(color(0));
     }
   }
 
-  for (let i = 0; i < closedSet.length; i++) {
-    closedSet[i].show(color(255, 0, 0));
-  }
-  for (let i = 0; i < openSet.length; i++) {
-    openSet[i].show(color(0, 0, 255));
-  }
+  // for (let i = 0; i < closedSet.length; i++) {
+  //   closedSet[i].show(color(255, 0, 0));
+  // }
+  // for (let i = 0; i < openSet.length; i++) {
+  //   openSet[i].show(color(30, 80, 255));
+  // }
 
   path = [];
   let temp = current;
@@ -165,7 +166,15 @@ function draw() {
     temp = temp.prev;
   }
 
+  // for (let i = 0; i < path.length; i++) {
+  //   path[i].show(color(0, 255, 0));
+  // }
+  noFill();
+  stroke(0, 255, 0);
+  strokeWeight(2);
+  beginShape();
   for (let i = 0; i < path.length; i++) {
-    path[i].show(color(0, 255, 0));
+    vertex(path[i].x * w + w / 2, path[i].y * h + h / 2);
   }
+  endShape();
 }
